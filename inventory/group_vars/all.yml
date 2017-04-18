@@ -146,6 +146,10 @@ skip_dnsmasq: false
 #  - 8.8.8.8
 #  - 8.8.4.4
 #
+#nameservers:
+#  - 8.8.8.8
+#  - 8.8.4.4
+#
 # # Use dns server : https://github.com/ansibl8s/k8s-skydns/blob/master/skydns-README.md
 dns_setup: true
 dns_domain: "{{ cluster_name }}"
