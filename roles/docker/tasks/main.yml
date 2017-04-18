@@ -35,6 +35,9 @@
   delay: "{{ retry_stagger | random + 3 }}"
   with_items: "{{ docker_repo_key_info.repo_keys }}"
   when: ansible_os_family != "CoreOS"
+  environment:
+    http_proxy: "{{ http_proxy|default('') }}"
+    https_proxy: "{{ https_proxy|default('') }}"
 
 - name: ensure docker repository is enabled
   action: "{{ docker_repo_info.pkg_repo }}"
