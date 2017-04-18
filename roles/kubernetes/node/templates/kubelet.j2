@@ -13,27 +13,30 @@ KUBELET_ADDRESS="--address={{ ip | default("0.0.0.0") }}"
 # You may leave this blank to use the actual hostname
 KUBELET_HOSTNAME="--hostname-override={{ ansible_hostname }}"
 
+
 {# Base kubelet args #}
-{% set kubelet_args_base %}--pod-manifest-path={{ kube_manifest_dir }} --pod-infra-container-image={{ pod_infra_image_repo }}:{{ pod_infra_image_tag }}{% endset %}
+KUBELET_ARGS_BASE="--pod-manifest-path={{ kube_manifest_dir }} --pod-infra-container-image={{ pod_infra_image_repo }}:{{ pod_infra_image_tag }}"
 
 {# DNS settings for kubelet #}
 {% if dns_setup|bool and skip_dnsmasq|bool %}
-{% set kubelet_args_cluster_dns %}--cluster_dns={{ skydns_server }}{% endset %}
+KUBELET_ARGS_CLUSTER_DNS="--cluster_dns={{ skydns_server }}"
 {% elif dns_setup|bool %}
-{% set kubelet_args_cluster_dns %}--cluster_dns={{ dns_server }}{% endset %}
+KUBELET_ARGS_CLUSTER_DNS="--cluster_dns={{ dns_server }}"
 {% else %}
-{% set kubelet_args_cluster_dns %}{% endset %}
+KUBELET_ARGS_CLUSTER_DNS=""
 {% endif %}
-{% set kubelet_args_dns %}{{ kubelet_args_cluster_dns }} --cluster_domain={{ dns_domain }} --resolv-conf={{ kube_resolv_conf }}{% endset %}
+KUBELET_ARGS_DNS="$KUBELET_ARGS_CLUSTER_DNS --cluster_domain={{ dns_domain }} --resolv-conf={{ kube_resolv_conf }}"
 
 {# Location of the apiserver #}
-{% set kubelet_args_kubeconfig %}--kubeconfig={{ kube_config_dir}}/node-kubeconfig.yaml --require-kubeconfig{% endset %}
+KUBELET_ARGS_KUBECONFIG="--kubeconfig={{ kube_config_dir}}/node-kubeconfig.yaml --require-kubeconfig"
 {% if standalone_kubelet|bool %}
 {# We are on a master-only host. Make the master unschedulable in this case. #}
-{% set kubelet_args_kubeconfig %}{{ kubelet_args_kubeconfig }} --register-schedulable=false{% endset %}
+KUBELET_ARGS_KUBECONFIG="--register-schedulable=false"
 {% endif %}
 
-KUBELET_ARGS="{{ kubelet_args_base }} {{ kubelet_args_dns }} {{ kubelet_args_kubeconfig }}"
+KUBELET_ARGS="$KUBELET_ARGS_BASE $KUBELET_ARGS_DNS $KUBELET_ARGS_KUBECONFIG"
+
+
 {% if kube_network_plugin is defined and kube_network_plugin in ["calico", "weave", "canal"] %}
 KUBELET_NETWORK_PLUGIN="--network-plugin=cni --network-plugin-dir=/etc/cni/net.d"
 {% elif kube_network_plugin is defined and kube_network_plugin == "weave" %}
