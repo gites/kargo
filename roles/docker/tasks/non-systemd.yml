@@ -25,9 +25,9 @@
 - name: Set docker proxy lines to be written
   set_fact:
     docker_proxy_lines:
-     - { name: "HTTP_PROXY", value: '"{{ http_proxy }}"' }
-     - { name: "HTTPS_PROXY", value: '"{{ https_proxy }}"' }
-     - { name: "NO_PROXY", value: '"{{ no_proxy }}"' }
+     - { name: "export HTTP_PROXY", value: '"{{ http_proxy }}"' }
+     - { name: "export HTTPS_PROXY", value: '"{{ https_proxy }}"' }
+     - { name: "export NO_PROXY", value: '"{{ no_proxy }}"' }
   tags: facts
 
 - name: Remove docker daemon proxy config lines that don't match desired lines
@@ -47,6 +47,7 @@
     mode: 0644
   with_items: "{{ docker_proxy_lines|default([]) }}"
   when: item.value is defined and (item.value | trim != '')
+  notify: restart docker
 
 - name: Remove docker daemon options lines that don't match desired line
   lineinfile:
